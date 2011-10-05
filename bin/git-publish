@@ -1,0 +1,48 @@
+#!/usr/local/bin/ruby
+
+require 'rubygems'
+colored = require 'colored' rescue nil
+
+def load_grit_or_die!
+  require 'grit'
+  rescue 
+    abort "Unable to load grit" 
+end
+
+load_grit_or_die!
+
+def get_branch_name
+  git_dir = `git rev-parse --git-dir`
+  repo = Grit::Repo.new(File.dirname(git_dir))
+  repo.head.name
+  rescue 
+    abort "Cannot locate git repo"
+end
+
+remote_name = ARGV[0] || 'origin'
+branch_name = ARGV[1] || get_branch_name
+
+def question(branch_name, remote_name, color=false)
+  msg = ''
+  if color
+    msg << '>> Publish branch '.yellow
+    msg << branch_name.white
+    msg << ' to '.yellow
+    msg << remote_name.white
+    msg << ' ? [Y/n]  '
+  else
+    msg = ">> Publish branch #{branch_name} to #{remote_name}? [Y/n]  "
+  end
+  msg
+end
+
+print question(branch_name, remote_name, colored)
+if STDIN.gets != "n\n"
+  commands = []
+  commands << push_to_remote = "git push #{remote_name} #{branch_name}:refs/heads/#{branch_name}"
+  commands << fetch          = "git fetch #{remote_name}"
+  commands << config_branch  = "git config branch.#{branch_name}.remote #{remote_name} && git config branch.#{branch_name}.merge refs/heads/#{branch_name}"
+  if `#{commands.join(' && ')}`
+    puts "  ... success! Published to #{remote_name}:#{branch_name}...".send(colored ? :green : 'to_s')
+  end
+end

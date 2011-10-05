@@ -1,0 +1,77 @@
+#!/usr/local/bin/ruby
+
+require 'rubygems'
+require 'colored' rescue nil
+
+def colored?
+  String.new.respond_to?(:yellow)
+end
+
+abort("You didn't tell me which branch to follow!".send(colored? ? :red : 'to_s')) unless ARGV[0]
+
+def remote_and_branch_from_github_url(string)
+  # example: https://github.com/jaw6/shopify/tree/bug_fix/utf8_sphinx -- .com/:remote_name/:repo/tree/:branch_name
+  if string =~ %r{\Ahttp[s]*://github\.com/([^/]+)/[^/]+/tree/(.+)\Z}
+    [$1, $2]
+  end
+end
+
+def remote_and_branch_from_input(string)
+  split_arg = string.split('/')
+  if split_arg.size == 1 # just one argument = that's a branch name, remote is 'origin'
+    remote_name, branch_name = 'origin', string
+  else
+    remote_name = split_arg.shift
+    branch_name = split_arg.join('/')
+  end
+  [remote_name, branch_name]
+end
+
+def question1(branch_name, remote_name, color=colored?)
+  msg = ''
+  if color
+    msg << '>> What remote/branch should be tracked? '.yellow
+    msg << " [#{remote_name}/#{branch_name}]  ".white
+  else
+    msg = ">> What remote/branch should be tracked?  [#{remote_name}/#{branch_name}]  "
+  end
+  msg
+end
+
+def question2(branch_name, color=colored?)
+  msg = ''
+  if color
+    msg << '>> What should it be called locally? '.yellow
+    msg << "     [#{branch_name}]  ".white
+  else
+    msg = ">> What should it be called locally?      [#{branch_name}]  "
+  end
+  msg
+end
+
+def remote_and_branch(answer)
+  remote_and_branch_from_github_url(answer) || remote_and_branch_from_input(answer)
+end
+
+def get_remote_and_branch_from_user
+  remote_name, branch_name = remote_and_branch(ARGV[0])
+  print question1(branch_name, remote_name)
+  answer = STDIN.gets.strip
+  answer.empty? ? [remote_name, branch_name] : remote_and_branch(answer)
+end
+
+def get_local_branch_name_from_user(branch_name)
+  print question2(branch_name)
+  answer = STDIN.gets.strip
+  answer.empty? ? branch_name : answer
+end
+
+if (remote_name, branch_name = get_remote_and_branch_from_user) and local_branch_name = get_local_branch_name_from_user(branch_name)
+  commands = []
+  commands << fetch         = "git fetch #{remote_name}"
+  commands << config_branch = "git branch --track #{local_branch_name} #{remote_name}/#{branch_name}"
+  commands << checkout      = "git checkout #{local_branch_name}"
+  if `#{commands.join(' && ')}`
+    puts "  ... success! Checked out #{local_branch_name} tracking #{remote_name}/#{branch_name}...".send(colored? ? :green : 'to_s')
+  end
+end

@@ -1,0 +1,80 @@
+git-friendly
+============
+
+GitFriendly currently contains two commands that make working with remote branches easier in git.
+
+
+git-publish
+-----------
+So, you've been working happily on feature_branch, and now you've come to the point where you'd like to
+share your work with others. But you can never remember the series of arcane commands to coerce git into
+publishing your branch to a remote. You try `git push`, but that doesn't do anything yet.
+
+Enter git-publish.
+
+Example:
+  $ git publish remote_name [branch_name]
+
+remote_name is the name of the remote you'd like to publish to. You need to have configured this remote
+            already, configuring a new remote is beyond what git-publish is currently capable of doing          
+            for you. Luckily, adding a new remote is not really that hard.
+
+branch_name is optional. If you omit it, git-publish will assume you want to publish the currently 
+            checked out branch. So, if you aren't working on the branch you'd like to publish, add 
+            it here.
+
+Here's what'll happen next:
+  $ git publish remote_name [branch_name]
+  >> Publish branch bug_fix/utf8_sphinx to jaw6 ? [Y/n]  
+
+If you hit enter, or y, or Y, or anything that isn't the letter n (n stands for "no"), then it'll go
+ahead and do this:
+
+  git push #{remote_name} #{branch_name}:refs/heads/#{branch_name}"
+  git fetch #{remote_name}"
+  git config branch.#{branch_name}.remote #{remote_name} 
+  git config branch.#{branch_name}.merge refs/heads/#{branch_name}"
+
+From then on, you'll be able to push and pull as you'd expect.
+
+git-follow
+----------
+So, someone just sent you an IM that says, "hey, I published that stuff on a branch, it's called
+stuff_im_workin_on". You'd like to set up a tracking branch, but maybe you'd rather it be called
+"new_feature_from_josh" locally. git-follow to the rescue!
+
+Examples:
+  $ git follow remote_name/branch_name
+  $ git follow https://github.com/jaw6/reponame/tree/stuff_im_workin_on
+  $ git follow branch_name              # will assume remote = 'origin'
+
+Note that if you only provide a branch name, and it has slashes in it (like, "feature/branch_name"),
+then git-follow will assume everything before the first slash is the remote_name (eg, "feature"). So, if
+branch_name has slashes, you should probably explicity provide a remote_name. But don't worry if you
+forget, because...
+
+Here's what'll happen next:
+  >> What remote/branch should be tracked?  [remote_name/branch_name]  
+  >> What should it be called locally?      [branch_name]  
+
+git-follow will show you the assumptions it's made, and allow you to override them. If you'd like the
+branch to be called something else locally, you can tell it, and it'll do the right thing. If the
+assumptions are correct, hit your enter key twice, and you'll be on your merry way.
+
+And then this will happen in the background:
+
+  git fetch #{remote_name}
+  git branch --track #{local_branch_name} #{remote_name}/#{branch_name}
+  git checkout #{local_branch_name}
+
+
+
+Do keep in mind
+---------------
+git-friendly is inspired by the fantastic git_remote_branch gem.
+
+If you like working with remote branches so much, you should also check out Aanand Prasad's fantastic
+git-up (https://github.com/aanand/git-up), which honestly has inspired quite a bit of what git-friendly
+is trying to do.
+
+Also: I might not actually know what I'm doing.
