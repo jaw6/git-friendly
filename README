@@ -25,7 +25,7 @@ branch_name is optional. If you omit it, git-publish will assume you want to pub
 
 Here's what'll happen next:
   $ git publish remote_name [branch_name]
-  >> Publish branch bug_fix/utf8_sphinx to jaw6 ? [Y/n]  
+  >> Publish branch branch_name to remote_name ? [Y/n]  
 
 If you hit enter, or y, or Y, or anything that isn't the letter n (n stands for "no"), then it'll go
 ahead and do this:
