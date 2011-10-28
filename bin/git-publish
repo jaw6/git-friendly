@@ -1,5 +1,6 @@
 #!/usr/local/bin/ruby
 
+require 'readline'
 require 'rubygems'
 colored = require 'colored' rescue nil
 
@@ -33,11 +34,11 @@ def question(branch_name, remote_name, color=false)
   else
     msg = ">> Publish branch #{branch_name} to #{remote_name}? [Y/n]  "
   end
-  msg
+  answer = Readline.readline(msg).strip
 end
 
-print question(branch_name, remote_name, colored)
-if STDIN.gets != "n\n"
+answer = question(branch_name, remote_name, colored)
+unless answer.downcase == 'n'
   commands = []
   commands << push_to_remote = "git push #{remote_name} #{branch_name}:refs/heads/#{branch_name}"
   commands << fetch          = "git fetch #{remote_name}"

@@ -1,5 +1,6 @@
 #!/usr/local/bin/ruby
 
+require 'readline'
 require 'rubygems'
 require 'colored' rescue nil
 
@@ -55,14 +56,12 @@ end
 
 def get_remote_and_branch_from_user
   remote_name, branch_name = remote_and_branch(ARGV[0])
-  print question1(branch_name, remote_name)
-  answer = STDIN.gets.strip
+  answer = Readline.readline(question1(branch_name, remote_name)).strip
   answer.empty? ? [remote_name, branch_name] : remote_and_branch(answer)
 end
 
 def get_local_branch_name_from_user(branch_name)
-  print question2(branch_name)
-  answer = STDIN.gets.strip
+  answer = Readline.readline(question2(branch_name)).strip
   answer.empty? ? branch_name : answer
 end
 
