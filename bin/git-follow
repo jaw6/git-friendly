@@ -65,7 +65,8 @@ def get_local_branch_name_from_user(branch_name)
   answer.empty? ? branch_name : answer
 end
 
-if (remote_name, branch_name = get_remote_and_branch_from_user) and local_branch_name = get_local_branch_name_from_user(branch_name)
+remote_name, branch_name = get_remote_and_branch_from_user
+if local_branch_name = get_local_branch_name_from_user(branch_name)
   commands = []
   commands << fetch         = "git fetch #{remote_name}"
   commands << config_branch = "git branch --track #{local_branch_name} #{remote_name}/#{branch_name}"
